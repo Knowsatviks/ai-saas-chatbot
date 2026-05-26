@@ -7,6 +7,7 @@ import { config } from "dotenv";
 import dns from "dns";
 import morgan from "morgan";
 import appRouter from "./routes/index.js";
+import cookieParser from "cookie-parser";
 
 // ===========================================
 // DNS CONFIGURATION
@@ -51,6 +52,7 @@ const app = express();
 // If client sends JSON body, convert it to JavaScript object
 // Without this: req.body would be undefined
 app.use(express.json());
+app.use(cookieParser(process.env.COOKIE_SECRET)); // Parse cookies with secret for signed cookies
 
 // 2. HTTP Request Logger - MORGAN
 // What it does: Logs every HTTP request to console

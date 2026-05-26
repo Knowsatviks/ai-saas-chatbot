@@ -1,6 +1,8 @@
 import {Request, Response, NextFunction} from "express";
 import User from "../models/User.js";
-import { hash } from "bcrypt"; 
+import { hash, compare } from "bcrypt"; 
+import { createToken } from "../utils/token-manager.js";
+import { COOKIE_NAME } from "../utils/constants.js";
 
 export const getAllUsers = async(req:Request, res:Response, next:NextFunction)=>{
     //gets all users from the database and returns them as a response
@@ -30,6 +32,20 @@ export const userSignup = async(req:Request, res:Response, next:NextFunction)=>{
         const hashedPassword = await hash(password, 10);
 
         const newUser = new User({ name, email, password: hashedPassword });
+
+        //create a token and store it in a cookie
+        res.clearCookie(COOKIE_NAME, {
+            httpOnly: true,
+            domain: "localhost",
+            signed:true,
+            path:"/",
+        });
+        const token = createToken(newUser._id.toString(), newUser.email, "7d"); // Expires in 7 days
+        const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days in milliseconds
+
+        res.cookie(COOKIE_NAME, token, { path: "/", domain:"localhost", expires, httpOnly:true, signed: true });
+
+
         await newUser.save();
 
         return res.status(201).json({ message: "User created successfully", user: newUser, id: newUser._id.toString() }); 
@@ -45,9 +61,27 @@ export const userLogin = async(req:Request, res:Response, next:NextFunction)=>{
     //user Login
     try{
         const { email, password } = req.body;
-        
+        const user = await User.findOne({ email });
 
-        // return res.status(201).json({ message: "User created successfully", user: newUser, id: newUser._id.toString() }); 
+        if (!user) {
+            return res.status(401).send( "User is not registered");
+        }
+        const isPasswordCorrect = await (compare(password, user.password));
+        if(!isPasswordCorrect){
+            return res.status(401).send("Incorrect password");
+        }
+        res.clearCookie(COOKIE_NAME, {
+            httpOnly: true,
+            domain: "localhost",
+            signed:true,
+            path:"/",
+        });
+        const token = createToken(user._id.toString(), user.email, "7d"); // Expires in 7 days
+        const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days in milliseconds
+
+        res.cookie(COOKIE_NAME, token, { path: "/", domain:"localhost", expires, httpOnly:true, signed: true });
+
+        return res.status(201).json({ message: "User logged in successfully", user: user, id: user._id.toString() }); 
     }
     catch(err){
         console.log(err);
