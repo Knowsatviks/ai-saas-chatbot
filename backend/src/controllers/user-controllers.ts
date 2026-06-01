@@ -48,7 +48,7 @@ export const userSignup = async(req:Request, res:Response, next:NextFunction)=>{
 
         await newUser.save();
 
-        return res.status(201).json({ message: "User created successfully", user: newUser, id: newUser._id.toString() }); 
+        return res.status(201).json({ message: "User created successfully", name: newUser.name, email: newUser.email }); 
     }
     catch(err){
         console.log(err);
@@ -81,11 +81,32 @@ export const userLogin = async(req:Request, res:Response, next:NextFunction)=>{
 
         res.cookie(COOKIE_NAME, token, { path: "/", domain:"localhost", expires, httpOnly:true, signed: true });
 
-        return res.status(201).json({ message: "User logged in successfully", user: user, id: user._id.toString() }); 
+        return res.status(201).json({ message: "User logged in successfully", name: user.name, email: user.email}); 
     }
     catch(err){
         console.log(err);
         const errorMessage = err instanceof Error ? err.message : "Unknown error";
         return res.status(500).json({message : "Error creating user", cause: errorMessage});
+    }
+}
+
+export const verifyUser = async(req:Request, res:Response, next:NextFunction)=>{
+    try{
+        const user = await User.findById(res.locals.jwtData.id);
+
+        if (!user) {
+            return res.status(401).send("User is not registered OR Token is invalid");
+        }
+
+        return res.status(200).json({ 
+            message: "User verified successfully!", 
+            name: user.name, 
+            email: user.email
+        }); 
+    }
+    catch(err){
+        console.log(err);
+        const errorMessage = err instanceof Error ? err.message : "Unknown error";
+        return res.status(500).json({message : "Error verifying user", cause: errorMessage});
     }
 }

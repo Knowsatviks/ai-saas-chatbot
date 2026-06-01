@@ -8,6 +8,7 @@ import dns from "dns";
 import morgan from "morgan";
 import appRouter from "./routes/index.js";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 // ===========================================
 // DNS CONFIGURATION
@@ -51,6 +52,7 @@ const app = express();
 // 1. Parse JSON requests
 // If client sends JSON body, convert it to JavaScript object
 // Without this: req.body would be undefined
+app.use(cors({ origin: "http://localhost:5173", credentials: true })); // Allow requests from frontend
 app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET)); // Parse cookies with secret for signed cookies
 
