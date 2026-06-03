@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import './App.css'
 import Header from './components/Header'
 import {Routes, Route} from "react-router-dom"
@@ -11,7 +10,7 @@ import { useAuth } from './context/AuthContext'
 
 
 function App() {
-  const [count, setCount] = useState(0);
+  const auth = useAuth();
 
   console.log(useAuth()?.isLoggedIn); 
 
@@ -22,7 +21,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/chat" element={<Chat />} />
+          <Route path="/chat" element={<Chat />} />
         <Route path="*" element={<NotFound />} />
      </Routes>
     </main>

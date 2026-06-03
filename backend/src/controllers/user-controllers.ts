@@ -77,9 +77,9 @@ export const userLogin = async(req:Request, res:Response, next:NextFunction)=>{
             path:"/",
         });
         const token = createToken(user._id.toString(), user.email, "7d"); // Expires in 7 days
-        const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days in milliseconds
+        const expiresIn = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days in milliseconds
 
-        res.cookie(COOKIE_NAME, token, { path: "/", domain:"localhost", expires, httpOnly:true, signed: true });
+        res.cookie(COOKIE_NAME, token, { path: "/", domain:"localhost", expires: expiresIn, httpOnly:true, signed: true });
 
         return res.status(201).json({ message: "User logged in successfully", name: user.name, email: user.email}); 
     }
@@ -90,7 +90,39 @@ export const userLogin = async(req:Request, res:Response, next:NextFunction)=>{
     }
 }
 
+export const userLogout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    //user token check
+    const user = await User.findById(res.locals.jwtData.id);
+    if (!user) {
+      return res.status(401).send("User not registered OR Token malfunctioned");
+    }
+    if (user._id.toString() !== res.locals.jwtData.id) {
+      return res.status(401).send("Permissions didn't match");
+    }
+
+    res.clearCookie(COOKIE_NAME, {
+      httpOnly: true,
+      domain: "localhost",
+      signed: true,
+      path: "/",
+    });
+
+    return res
+      .status(200)
+      .json({ message: "OK", name: user.name, email: user.email });
+  } catch (error:any) {
+    console.log(error);
+    return res.status(200).json({ message: "ERROR", cause: error.message });
+  }
+};
+
 export const verifyUser = async(req:Request, res:Response, next:NextFunction)=>{
+    //Verifies the user by checking the token and returns user details if token is valid
     try{
         const user = await User.findById(res.locals.jwtData.id);
 
