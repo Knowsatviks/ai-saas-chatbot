@@ -31,6 +31,12 @@ const Header = () => {
               <NavigationLink
                 bg="#00ffffc"
                 to="/chat"
+                text="New Chat"
+                textColor="#000"
+              />
+              <NavigationLink
+                bg="#00ffffc"
+                to="/chat"
                 text="Logout"
                 textColor="#000"
                 onClick={auth.logout}

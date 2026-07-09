@@ -14,7 +14,6 @@ const TypingAnim = () => {
 
   useEffect(() => {
     const currentWord = words[currentWordIndex];
-    const typingDelay = isDeleting ? 50 : 100;
     const pauseDelay = 2000;
 
     const timeout = setTimeout(

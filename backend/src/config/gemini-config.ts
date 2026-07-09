@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai";
+import { buildPersonaInstruction, type PersonaPromptShape } from "../utils/prompt-builder.js";
 
 let cachedModel: GenerativeModel | null = null;
 
@@ -33,19 +34,31 @@ export const getGeminiModel = () => {
     return cachedModel;
 };
 
-export const generateResponse = async (chatHistory: Array<{role: string; content: string}>) => {
+export const generateResponse = async (
+    chatHistory: Array<{role: string; content: string}>,
+    persona?: PersonaPromptShape | null
+) => {
     try {
         const model = getGeminiModel();
-        
-        // Convert chat history to Gemini format
+        const personaInstruction = buildPersonaInstruction(persona);
+
         const chat = model.startChat({
-            history: chatHistory.map(msg => ({
-                role: msg.role === "user" ? "user" : "model",
-                parts: [{ text: msg.content }]
-            }))
+            history: [
+                {
+                    role: "user",
+                    parts: [{ text: `System instruction: ${personaInstruction}` }],
+                },
+                {
+                    role: "model",
+                    parts: [{ text: "Understood. I will follow this persona consistently." }],
+                },
+                ...chatHistory.map(msg => ({
+                    role: msg.role === "user" ? "user" : "model",
+                    parts: [{ text: msg.content }]
+                }))
+            ]
         });
         
-        // Get the last user message
         const userMessage = chatHistory[chatHistory.length - 1].content;
         
         const result = await chat.sendMessage(userMessage);

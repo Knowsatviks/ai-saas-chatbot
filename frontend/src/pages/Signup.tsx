@@ -18,9 +18,9 @@ const Signup = () => {
       toast.loading("Signing Up", { id: "signup" });
       await auth?.signup(name, email, password);
       toast.success("Signed Up Successfully", { id: "signup" });
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
-      toast.error("Signing Up Failed", { id: "signup" });
+      toast.error(error?.message || "Signing Up Failed", { id: "signup" });
     }
   };
   useEffect(() => {

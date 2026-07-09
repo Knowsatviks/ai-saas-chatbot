@@ -10,7 +10,7 @@ import { useAuth } from './context/AuthContext'
 
 
 function App() {
-  const auth = useAuth();
+  useAuth();
 
   console.log(useAuth()?.isLoggedIn); 
 

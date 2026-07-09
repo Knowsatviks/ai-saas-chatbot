@@ -1,10 +1,11 @@
-import { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import User from "../models/User.js";
+import Persona from "../models/Persona.js";
 import { generateResponse } from "../config/gemini-config.js";
 
-export const generateChatCompletion = async (req: Request, res: Response, next: NextFunction) => {
+export const generateChatCompletion = async (req: Request, res: Response, _next: NextFunction) => {
     try {
-        const { message } = req.body;
+        const { message, personaId } = req.body;
 
         // Validate input
         if (!message || message.trim() === "") {
@@ -16,16 +17,22 @@ export const generateChatCompletion = async (req: Request, res: Response, next: 
             return res.status(401).json({ message: "User not registered or token is invalid" });
         }
 
+        let activePersona = null;
+
+        if (personaId) {
+            activePersona = await Persona.findOne({ _id: personaId, userId: user._id });
+        }
+
         // Prepare chat history
         const chatHistory = user.chats.map(({ role, content }) => ({ role, content }));
         chatHistory.push({ content: message, role: "user" });
 
         // Get response from Gemini
-        const aiResponse = await generateResponse(chatHistory);
+        const aiResponse = await generateResponse(chatHistory, activePersona);
 
         // Save both user message and AI response to database
-        user.chats.push({ content: message, role: "user" });
-        user.chats.push({ content: aiResponse, role: "assistant" });
+        user.chats.push({ content: message, role: "user", personaId: activePersona?._id ?? null });
+        user.chats.push({ content: aiResponse, role: "assistant", personaId: activePersona?._id ?? null });
         await user.save();
 
         return res.status(200).json({ 
@@ -40,7 +47,7 @@ export const generateChatCompletion = async (req: Request, res: Response, next: 
     }
 };
 
-export const sendChatsToUser = async(req:Request, res:Response, next:NextFunction)=>{
+export const sendChatsToUser = async(_req:Request, res:Response, _next:NextFunction)=>{
     //User token check
     try{
         const user = await User.findById(res.locals.jwtData.id);
@@ -65,7 +72,7 @@ export const sendChatsToUser = async(req:Request, res:Response, next:NextFunctio
     }
 } 
 
-export const deleteChats = async(req:Request, res:Response, next:NextFunction)=>{
+export const deleteChats = async(_req:Request, res:Response, _next:NextFunction)=>{
     //User token check
     try{
         const user = await User.findById(res.locals.jwtData.id);
