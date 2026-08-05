@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import Conversation from "../models/Conversation.js";
 import Persona from "../models/Persona.js";
 
 export const getUserPersonas = async (_req: Request, res: Response, _next: NextFunction) => {
@@ -61,5 +62,36 @@ export const createPersona = async (req: Request, res: Response, _next: NextFunc
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Failed to create persona" });
+  }
+};
+
+export const deletePersona = async (req: Request, res: Response, _next: NextFunction) => {
+  try {
+    const userId = res.locals.jwtData?.id;
+    const { personaId } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    if (!personaId) {
+      return res.status(400).json({ message: "Persona id is required" });
+    }
+
+    const persona = await Persona.findOne({ _id: personaId, userId });
+    if (!persona) {
+      return res.status(404).json({ message: "Persona not found" });
+    }
+
+    await Persona.deleteOne({ _id: personaId, userId });
+    await Conversation.updateMany(
+      { userId, personaId },
+      { $unset: { personaId: "" } }
+    );
+
+    return res.status(200).json({ message: "Persona deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to delete persona" });
   }
 };

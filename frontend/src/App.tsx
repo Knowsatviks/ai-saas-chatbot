@@ -4,6 +4,7 @@ import {Routes, Route} from "react-router-dom"
 import NotFound from './pages/NotFound'
 import Signup from './pages/Signup'
 import Login from './pages/Login'
+import ForgotPassword from './pages/ForgotPassword'
 import Chat from './pages/Chat'
 import Home from './pages/Home'
 import { useAuth } from './context/AuthContext'
@@ -20,8 +21,9 @@ function App() {
      <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/signup" element={<Signup />} />
-          <Route path="/chat" element={<Chat />} />
+        <Route path="/chat" element={<Chat />} />
         <Route path="*" element={<NotFound />} />
      </Routes>
     </main>

@@ -96,9 +96,23 @@ export const sendMessageToConversation = async (req: Request, res: Response, _ne
       return res.status(404).json({ message: "Conversation not found" });
     }
 
+    const isExistingConversation = conversation.messages.length > 0;
+    const requestedPersonaId = personaId || null;
+
+    if (isExistingConversation && requestedPersonaId) {
+      const existingPersonaId = conversation.personaId ? conversation.personaId.toString() : null;
+      if (existingPersonaId && existingPersonaId !== requestedPersonaId) {
+        return res.status(400).json({ message: "Cannot change persona for an existing conversation" });
+      }
+    }
+
+    const effectivePersonaId = isExistingConversation
+      ? conversation.personaId ? conversation.personaId.toString() : null
+      : requestedPersonaId;
+
     let activePersona = null;
-    if (personaId) {
-      activePersona = await Persona.findOne({ _id: personaId, userId });
+    if (effectivePersonaId) {
+      activePersona = await Persona.findOne({ _id: effectivePersonaId, userId });
     }
 
     const chatHistory = conversation.messages.map(({ role, content }) => ({ role, content }));
@@ -108,7 +122,9 @@ export const sendMessageToConversation = async (req: Request, res: Response, _ne
 
     conversation.messages.push({ role: "user", content: message, personaId: activePersona?._id ?? null });
     conversation.messages.push({ role: "assistant", content: aiResponse, personaId: activePersona?._id ?? null });
-    conversation.personaId = activePersona?._id ?? conversation.personaId ?? null;
+    if (!conversation.personaId && activePersona?._id) {
+      conversation.personaId = activePersona._id;
+    }
     conversation.title = conversation.title === "New Conversation" ? message.slice(0, 40) : conversation.title;
     await conversation.save();
 

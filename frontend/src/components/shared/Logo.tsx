@@ -5,7 +5,7 @@ const Logo = () => {
     <div
       style={{
         display: "flex",
-        marginRight: "auto",
+        marginLeft: "40px",
         alignItems: "center",
         gap: "15px",
       }}

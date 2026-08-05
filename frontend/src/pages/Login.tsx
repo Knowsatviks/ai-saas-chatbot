@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
 import { IoIosLogIn } from "react-icons/io";
+import { Link, useNavigate } from "react-router-dom";
 import { Box, Typography, Button } from "@mui/material";
 import CustomizedInput from "../components/shared/CustomizedInput";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -69,12 +69,17 @@ const Login = () => {
             </Typography>
             <CustomizedInput type="email" name="email" label="Email" />
             <CustomizedInput type="password" name="password" label="Password" />
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1, mb: 1 }}>
+              <Link to="/forgot-password" style={{ color: "#00fffc", textDecoration: "none", fontSize: "0.95rem" }}>
+                Forgot Password?
+              </Link>
+            </Box>
             <Button
               type="submit"
               sx={{
                 px: 2,
                 py: 1,
-                mt: 2,
+                mt: 1,
                 width: "400px",
                 borderRadius: 2,
                 bgcolor: "#00fffc",

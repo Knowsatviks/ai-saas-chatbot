@@ -126,6 +126,14 @@ export const createPersona = async (payload: {
   return res.data;
 };
 
+export const deletePersona = async (personaId: string) => {
+  const res = await axios.delete("/chat/personas", { data: { personaId } });
+  if (res.status !== 200) {
+    throw new Error("Unable to delete persona");
+  }
+  return res.data;
+};
+
 export const getUserChats = async () => {
     const res = await axios.get("/chat/conversations");
 
