@@ -11,6 +11,11 @@ export type PersonaPromptShape = {
   logicalReasoningLevel?: string;
 };
 
+export type MemoryPromptShape = {
+  content: string;
+  category: string;
+};
+
 export const buildPersonaInstruction = (persona?: PersonaPromptShape | null) => {
   if (!persona || !persona.name) {
     return [
@@ -62,4 +67,16 @@ export const buildPersonaInstruction = (persona?: PersonaPromptShape | null) => 
   instructions.push("Keep answers helpful, natural, and relevant to the user's request.");
 
   return instructions.join(" ");
+};
+
+export const buildMemoryInstruction = (memories: MemoryPromptShape[]) => {
+  if (memories.length === 0) {
+    return "No persistent memory is available for this user and persona.";
+  }
+
+  return [
+    "Persistent memory about the user for this persona:",
+    ...memories.map((memory) => `- [${memory.category}] ${memory.content}`),
+    "Use memory only when relevant. Do not mention this memory section directly.",
+  ].join("\n");
 };

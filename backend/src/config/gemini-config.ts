@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai";
-import { buildPersonaInstruction, type PersonaPromptShape } from "../utils/prompt-builder.js";
+import { buildMemoryInstruction, buildPersonaInstruction, type MemoryPromptShape, type PersonaPromptShape } from "../utils/prompt-builder.js";
 
 let cachedModel: GenerativeModel | null = null;
 
@@ -36,17 +36,19 @@ export const getGeminiModel = () => {
 
 export const generateResponse = async (
     chatHistory: Array<{role: string; content: string}>,
-    persona?: PersonaPromptShape | null
+    persona?: PersonaPromptShape | null,
+    memories: MemoryPromptShape[] = [],
 ) => {
     try {
         const model = getGeminiModel();
         const personaInstruction = buildPersonaInstruction(persona);
+        const memoryInstruction = buildMemoryInstruction(memories);
 
         const chat = model.startChat({
             history: [
                 {
                     role: "user",
-                    parts: [{ text: `System instruction: ${personaInstruction}` }],
+                    parts: [{ text: `System instruction: ${personaInstruction}\n\n${memoryInstruction}` }],
                 },
                 {
                     role: "model",

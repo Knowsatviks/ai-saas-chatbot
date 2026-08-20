@@ -2,6 +2,8 @@ import type { NextFunction, Request, Response } from "express";
 import Conversation from "../models/Conversation.js";
 import Persona from "../models/Persona.js";
 import { generateResponse } from "../config/gemini-config.js";
+import { getRelevantMemories } from "../services/memory-service.js";
+import { extractAndStoreMemory } from "../services/memory-extraction-service.js";
 
 export const listConversations = async (_req: Request, res: Response, _next: NextFunction) => {
   try {
@@ -113,20 +115,37 @@ export const sendMessageToConversation = async (req: Request, res: Response, _ne
     let activePersona = null;
     if (effectivePersonaId) {
       activePersona = await Persona.findOne({ _id: effectivePersonaId, userId });
+      if (!activePersona) {
+        return res.status(404).json({ message: "Persona not found" });
+      }
     }
 
     const chatHistory = conversation.messages.map(({ role, content }) => ({ role, content }));
     chatHistory.push({ role: "user", content: message });
 
-    const aiResponse = await generateResponse(chatHistory, activePersona);
+    const memories = activePersona
+      ? await getRelevantMemories(userId, activePersona._id.toString(), message)
+      : [];
+    const aiResponse = await generateResponse(chatHistory, activePersona, memories);
 
-    conversation.messages.push({ role: "user", content: message, personaId: activePersona?._id ?? null });
+    const sourceMessageId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    conversation.messages.push({ id: sourceMessageId, role: "user", content: message, personaId: activePersona?._id ?? null });
     conversation.messages.push({ role: "assistant", content: aiResponse, personaId: activePersona?._id ?? null });
     if (!conversation.personaId && activePersona?._id) {
       conversation.personaId = activePersona._id;
     }
     conversation.title = conversation.title === "New Conversation" ? message.slice(0, 40) : conversation.title;
     await conversation.save();
+
+    if (activePersona) {
+      void extractAndStoreMemory({
+        message,
+        userId,
+        personaId: activePersona._id.toString(),
+        conversationId: conversation._id.toString(),
+        sourceMessageId,
+      }).catch((error) => console.error("Memory extraction failed:", error));
+    }
 
     return res.status(200).json({ message: aiResponse, conversation });
   } catch (error) {

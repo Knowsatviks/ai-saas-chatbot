@@ -3,6 +3,7 @@ import { verifyToken } from "../utils/token-manager.js";
 import { createPersona, deletePersona, getUserPersonas } from "../controllers/persona-controllers.js";
 import { createConversation, deleteConversation, listConversations, renameConversation, sendMessageToConversation } from "../controllers/conversation-controllers.js";
 import { chatCompletionValidator, validate } from "../utils/validators.js";
+import { deleteMemory, listMemories, updateMemory } from "../controllers/memory-controllers.js";
 
 const chatRoutes = Router();
 
@@ -11,6 +12,9 @@ chatRoutes.get("/personas", verifyToken, getUserPersonas);
 chatRoutes.post("/personas", verifyToken, createPersona);
 chatRoutes.delete("/personas", verifyToken, deletePersona);
 chatRoutes.delete("/personas/:personaId", verifyToken, deletePersona);
+chatRoutes.get("/memories", verifyToken, listMemories);
+chatRoutes.patch("/memories/:memoryId", verifyToken, updateMemory);
+chatRoutes.delete("/memories/:memoryId", verifyToken, deleteMemory);
 chatRoutes.get("/conversations", verifyToken, listConversations);
 chatRoutes.post("/conversations", verifyToken, createConversation);
 chatRoutes.put("/conversations/rename", verifyToken, renameConversation);

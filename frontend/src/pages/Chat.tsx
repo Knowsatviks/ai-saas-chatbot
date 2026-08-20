@@ -718,10 +718,9 @@ const Chat = () => {
             color: "white",
             mb: 2,
             fontWeight: "600",
-            textAlign: "right",
+            textAlign: "center",
             width: "100%",
             maxWidth: "980px",
-            alignSelf: "flex-end",
           }}
         >
           Model - Gemini-2.5-Flash
