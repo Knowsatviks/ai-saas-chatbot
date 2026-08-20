@@ -50,6 +50,33 @@ export const checkAuthStatus = async ()=>{
     return data;
 }
 
+export const requestPasswordReset = async (email: string) => {
+  try {
+    const res = await axios.post("/user/forgot-password", { email });
+    return res.data;
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || "Unable to send reset OTP");
+  }
+};
+
+export const verifyPasswordResetOtp = async (email: string, otp: string) => {
+  try {
+    const res = await axios.post("/user/verify-reset-otp", { email, otp });
+    return res.data;
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || "The OTP is invalid");
+  }
+};
+
+export const resetPassword = async (resetToken: string, password: string) => {
+  try {
+    const res = await axios.post("/user/reset-password", { resetToken, password });
+    return res.data;
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || "Unable to update password");
+  }
+};
+
 export const createConversation = async (payload: { title?: string; personaId?: string | null }) => {
   const res = await axios.post("/chat/conversations", payload);
 
@@ -127,7 +154,7 @@ export const createPersona = async (payload: {
 };
 
 export const deletePersona = async (personaId: string) => {
-  const res = await axios.delete("/chat/personas", { data: { personaId } });
+  const res = await axios.delete(`/chat/personas/${personaId}`);
   if (res.status !== 200) {
     throw new Error("Unable to delete persona");
   }

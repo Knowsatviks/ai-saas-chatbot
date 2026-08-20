@@ -10,6 +10,7 @@ chatRoutes.post("/new", validate(chatCompletionValidator), verifyToken, sendMess
 chatRoutes.get("/personas", verifyToken, getUserPersonas);
 chatRoutes.post("/personas", verifyToken, createPersona);
 chatRoutes.delete("/personas", verifyToken, deletePersona);
+chatRoutes.delete("/personas/:personaId", verifyToken, deletePersona);
 chatRoutes.get("/conversations", verifyToken, listConversations);
 chatRoutes.post("/conversations", verifyToken, createConversation);
 chatRoutes.put("/conversations/rename", verifyToken, renameConversation);

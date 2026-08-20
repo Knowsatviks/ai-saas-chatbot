@@ -8,6 +8,8 @@ import ForgotPassword from './pages/ForgotPassword'
 import Chat from './pages/Chat'
 import Home from './pages/Home'
 import { useAuth } from './context/AuthContext'
+import NewPassword from './pages/NewPassword'
+import OneTimePassword from './pages/OneTimePassword'
 
 
 function App() {
@@ -25,6 +27,8 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="*" element={<NotFound />} />
+        <Route path="/new-password" element={<NewPassword />} />
+        <Route path="/one-time-password" element={<OneTimePassword />} />
      </Routes>
     </main>
   )

@@ -1,5 +1,5 @@
 import AppBar from "@mui/material/AppBar";
-import { Toolbar } from "@mui/material";
+import { Box, Toolbar, Typography } from "@mui/material";
 import Logo from "./shared/Logo";
 import { useAuth } from "../context/AuthContext";
 import NavigationLink from "./shared/NavigationLink";
@@ -17,11 +17,11 @@ const Header = () => {
         boxShadow: "none",
       }}
     >
-      <Toolbar sx={{ display: "flex" }}>
-        <Logo />
-        <div>
+      <Toolbar sx={{ display: "flex", justifyContent: "space-between", gap: 2, px: { xs: 2, md: 4 } }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, md: 2 }, minWidth: 0 }}>
+          <Logo />
           {auth?.isLoggedIn ? (
-            <>
+            <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: { xs: 0.5, md: 1 } }}>
               <NavigationLink
                 bg="#00ffffc"
                 to="/chat"
@@ -30,14 +30,20 @@ const Header = () => {
               />
               <NavigationLink
                 bg="#00ffffc"
+                to="/chat?new=true"
+                text="New Chat"
+                textColor="#000"
+              />
+              <NavigationLink
+                bg="#e57373"
                 to="/login"
                 text="Logout"
-                textColor="#000"
+                textColor="white"
                 onClick={auth.logout}
               />
-            </>
+            </Box>
           ) : (
-            <>
+            <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: { xs: 0.5, md: 1 } }}>
               <NavigationLink
                 bg="#00fffc"
                 to="/login"
@@ -50,9 +56,20 @@ const Header = () => {
                 to="/signup"
                 text="Signup"
               />
-            </>
+            </Box>
           )}
-        </div>
+        </Box>
+        <Typography
+          sx={{
+            ml: "auto",
+            fontWeight: 800,
+            fontSize: { xs: "16px", md: "20px" },
+            textShadow: "2px 2px 20px #000",
+            whiteSpace: "nowrap",
+          }}
+        >
+          <span style={{ fontSize: "inherit" }}>MERN</span>-GPT
+        </Typography>
       </Toolbar>
     </AppBar>
   );

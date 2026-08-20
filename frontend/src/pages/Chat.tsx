@@ -309,6 +309,22 @@ const Chat = () => {
         });
     }
   }, [auth]);
+
+  // Handle ?new=true parameter to start a fresh conversation when navigated from header
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const startNew = params.get("new");
+    if (startNew === "true" && auth?.isLoggedIn) {
+      // Small delay to allow initial load
+      setTimeout(() => {
+        handleNewChat();
+        // remove the query param so repeated navigation doesn't keep creating
+        params.delete("new");
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, "", newUrl);
+      }, 300);
+    }
+  }, [auth]);
   useEffect(() => {
     if (!auth?.user) {
       navigate("/login");
@@ -371,7 +387,6 @@ const Chat = () => {
             flexDirection: "column",
             height: "100%",
             width: 320,
-            overflow: "hidden",
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 2, py: 1 }}>
@@ -388,7 +403,7 @@ const Chat = () => {
             </IconButton>
           </Box>
 
-          <Box sx={{ px: 2, pb: 2 }}>
+          <Box sx={{ px: 2, pb: 2, flex: 1, overflowY: 'auto' }}>
             <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
               <Avatar
                 sx={{
@@ -684,7 +699,13 @@ const Chat = () => {
       <Box
         sx={{
           display: "flex",
-          flex: { md: 0.8, xs: 1, sm: 1 },
+          flex: 1,
+          width: {
+            xs: "100%",
+            md: isDrawerOpen ? "calc(100% - 320px)" : "100%",
+          },
+          ml: { xs: 0, md: isDrawerOpen ? "320px" : 0 },
+          transition: "margin-left 220ms ease, width 220ms ease",
           flexDirection: "column",
           alignItems: "center",
           px: { xs: 1, sm: 2, md: 3 },
@@ -697,9 +718,10 @@ const Chat = () => {
             color: "white",
             mb: 2,
             fontWeight: "600",
-            textAlign: "center",
+            textAlign: "right",
             width: "100%",
             maxWidth: "980px",
+            alignSelf: "flex-end",
           }}
         >
           Model - Gemini-2.5-Flash

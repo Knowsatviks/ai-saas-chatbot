@@ -9,3 +9,15 @@ It's a completely secure application using JWT Tokens, HTTP-Only Cookies, Signed
 
 Contributions are welcome
 
+## Password reset email configuration
+
+Password reset OTPs are sent through SMTP. Copy `.env.example` to `.env`, then replace the placeholder values:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+The backend returns `503 Password reset email service is not configured` when the SMTP variables are missing.
+
+For Gmail, use an app password with SMTP enabled rather than your regular account password.
+

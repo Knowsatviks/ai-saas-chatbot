@@ -68,7 +68,7 @@ export const createPersona = async (req: Request, res: Response, _next: NextFunc
 export const deletePersona = async (req: Request, res: Response, _next: NextFunction) => {
   try {
     const userId = res.locals.jwtData?.id;
-    const { personaId } = req.body;
+    const personaId = req.params.personaId || req.body.personaId;
 
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });

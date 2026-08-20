@@ -3,27 +3,45 @@ import { Box, Typography, Button } from "@mui/material";
 import CustomizedInput from "../components/shared/CustomizedInput";
 import { toast } from "react-hot-toast";
 import { useNavigate, Link } from "react-router-dom";
-import { requestPasswordReset } from "../helpers/api-communicator";
+import { resetPassword } from "../helpers/api-communicator";
 
-const ForgotPassword = () => {
+const NewPassword = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+    const resetToken = new URLSearchParams(window.location.search).get("token");
 
-    if (!email) {
-      toast.error("Please enter your email");
+    if (!resetToken) {
+      toast.error("Your password reset session has expired");
+      navigate("/forgot-password");
+      return;
+    }
+
+    if (!password || !confirmPassword) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters long");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
       return;
     }
 
     try {
-      await requestPasswordReset(email);
-      toast.success("Password reset OTP sent");
-      navigate(`/one-time-password?email=${encodeURIComponent(email)}`);
+      await resetPassword(resetToken, password);
+      toast.success("Password updated successfully");
+      navigate("/login");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Unable to send reset OTP");
+      toast.error("Unable to update password");
     }
   };
 
@@ -44,12 +62,13 @@ const ForgotPassword = () => {
         >
           <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
             <Typography variant="h4" sx={{ textAlign: "center", p: 2, fontWeight: 600 }}>
-              Forgot Password
+              Enter New Password
             </Typography>
             <Typography sx={{ textAlign: "center", color: "#cfd8dc", mb: 2 }}>
-              Enter your email and we will send an OTP to reset your password.
+              Enter your new password below.
             </Typography>
-            <CustomizedInput type="email" name="email" label="Email" />
+            <CustomizedInput type="password" name="password" label="New Password" />
+            <CustomizedInput type="password" name="confirmPassword" label="Confirm New Password" />
             <Button
               type="submit"
               sx={{
@@ -65,7 +84,7 @@ const ForgotPassword = () => {
                 },
               }}
             >
-              Send Reset OTP
+              Update Password
             </Button>
             <Box sx={{ mt: 2, textAlign: "center" }}>
               <Link to="/login" style={{ color: "#00fffc", textDecoration: "none" }}>
@@ -79,4 +98,4 @@ const ForgotPassword = () => {
   );
 };
 
-export default ForgotPassword;
+export default NewPassword;

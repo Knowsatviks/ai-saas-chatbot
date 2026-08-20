@@ -35,6 +35,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    resetOtpHash: {
+        type: String,
+        default: null,
+    },
+    resetOtpExpiresAt: {
+        type: Date,
+        default: null,
+    },
     chats: [chatSchema]
 });
 
