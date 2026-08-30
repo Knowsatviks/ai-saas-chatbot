@@ -9,6 +9,44 @@ It's a completely secure application using JWT Tokens, HTTP-Only Cookies, Signed
 
 Contributions are welcome
 
+## Environment Configuration
+
+Before running locally, create a `.env` file based on `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+Required variables:
+- `MONGODB_URL`: Connection string to MongoDB
+- `JWT_SECRET`: Secret key for JWT tokens
+- `COOKIE_SECRET`: Secret key for signed cookies
+- `GEMINI_API_KEY`: API key for Google Gemini
+
+For password reset emails, also configure SMTP variables. See `.env.example` for details.
+
+## Deployment
+
+### Local Development
+```bash
+npm install
+npm run build  # TypeScript compilation
+npm start      # Runs compiled dist/index.js
+```
+
+### Production (e.g., Render)
+
+Set these environment variables:
+- `NODE_ENV=production` (enables secure cookies with HTTPS)
+- `PORT=<provided by platform>`
+- `FRONTEND_URL=<your-frontend-url>` (for CORS)
+- All other variables from `.env.example`
+
+The application will:
+- Bind to `0.0.0.0` on the provided `PORT`
+- Use secure HTTPS cookies in production
+- Apply strict CORS policy to the provided `FRONTEND_URL`
+
 ## Semantic persona memory
 
 Persistent memories use Google `text-embedding-004` embeddings and MongoDB Atlas Vector Search. Add this optional variable to `.env` to override the defaults:

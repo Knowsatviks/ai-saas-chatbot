@@ -52,7 +52,13 @@ const app = express();
 // 1. Parse JSON requests
 // If client sends JSON body, convert it to JavaScript object
 // Without this: req.body would be undefined
-app.use(cors({ origin: "http://localhost:5173", credentials: true })); // Allow requests from frontend
+
+// CORS configuration - allows frontend to make cross-origin requests
+// Uses FRONTEND_URL from environment, defaults to localhost for development
+const frontendUrl =
+  process.env.FRONTEND_URL || "http://localhost:5173";
+
+app.use(cors({ origin: frontendUrl, credentials: true })); // Allow requests from frontend
 app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET)); // Parse cookies with secret for signed cookies
 

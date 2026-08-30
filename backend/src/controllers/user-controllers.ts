@@ -9,6 +9,19 @@ import { MailConfigurationError, sendPasswordResetOtp } from "../config/mail-con
 
 const PASSWORD_RESET_EXPIRY_MINUTES = 10;
 
+// Production-safe cookie options based on NODE_ENV
+// - Local development uses HTTP and lax SameSite
+// - Production uses HTTPS and strict security settings
+const isProduction = process.env.NODE_ENV === "production";
+
+const cookieOptions = {
+  path: "/",
+  httpOnly: true,
+  signed: true,
+  secure: isProduction,
+  sameSite: isProduction ? ("none" as const) : ("lax" as const),
+};
+
 const createPasswordResetToken = (userId: string, email: string) => jwt.sign(
     { id: userId, email, purpose: "password-reset" },
     process.env.JWT_SECRET as string,
@@ -45,16 +58,11 @@ export const userSignup = async(req:Request, res:Response, next:NextFunction)=>{
         const newUser = new User({ name, email, password: hashedPassword });
 
         //create a token and store it in a cookie
-        res.clearCookie(COOKIE_NAME, {
-            httpOnly: true,
-            domain: "localhost",
-            signed:true,
-            path:"/",
-        });
+        res.clearCookie(COOKIE_NAME, cookieOptions);
         const token = createToken(newUser._id.toString(), newUser.email, "7d"); // Expires in 7 days
         const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days in milliseconds
 
-        res.cookie(COOKIE_NAME, token, { path: "/", domain:"localhost", expires, httpOnly:true, signed: true });
+        res.cookie(COOKIE_NAME, token, { ...cookieOptions, expires });
 
 
         await newUser.save();
@@ -81,16 +89,11 @@ export const userLogin = async(req:Request, res:Response, next:NextFunction)=>{
         if(!isPasswordCorrect){
             return res.status(401).send("Incorrect password");
         }
-        res.clearCookie(COOKIE_NAME, {
-            httpOnly: true,
-            domain: "localhost",
-            signed:true,
-            path:"/",
-        });
+        res.clearCookie(COOKIE_NAME, cookieOptions);
         const token = createToken(user._id.toString(), user.email, "7d"); // Expires in 7 days
         const expiresIn = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days in milliseconds
 
-        res.cookie(COOKIE_NAME, token, { path: "/", domain:"localhost", expires: expiresIn, httpOnly:true, signed: true });
+        res.cookie(COOKIE_NAME, token, { ...cookieOptions, expires: expiresIn });
 
         return res.status(201).json({ message: "User logged in successfully", name: user.name, email: user.email}); 
     }
@@ -116,12 +119,7 @@ export const userLogout = async (
       return res.status(401).send("Permissions didn't match");
     }
 
-    res.clearCookie(COOKIE_NAME, {
-      httpOnly: true,
-      domain: "localhost",
-      signed: true,
-      path: "/",
-    });
+    res.clearCookie(COOKIE_NAME, cookieOptions);
 
     return res
       .status(200)

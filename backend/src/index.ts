@@ -22,9 +22,10 @@ import { connectToDatabase } from "./db/connection.js";
 
 connectToDatabase().then(() => {
   // Server only starts AFTER database connects
-  // process.env.PORT comes from .env (e.g., PORT=5000)
-  const port = process.env.PORT;
-  app.listen(port, () => {
+  // Use PORT from environment (Render provides this) or default to 5000
+  // Bind to 0.0.0.0 to listen on all interfaces (required for container/cloud deployment)
+  const port = Number(process.env.PORT) || 5000;
+  app.listen(port, "0.0.0.0", () => {
     console.log(`✅ Server is running on port ${port} and connected to database`);
   });
 }).catch((error) => {

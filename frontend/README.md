@@ -2,6 +2,30 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+## Environment Configuration
+
+Before running locally, create a `.env` file based on `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+Update `VITE_API_URL` to point to your backend:
+- Local development: `http://localhost:5000/api/v1`
+- Production (Render): `https://<backend-url>/api/v1`
+
+## Deployment to Render
+
+This is a React SPA (Single Page Application). When deploying to Render, configure a Rewrite rule to handle client-side routing:
+
+1. In Render dashboard, go to your Frontend service → Settings → Redirects/Rewrites
+2. Add this rewrite rule:
+   - **Source:** `/*`
+   - **Destination:** `/index.html`
+   - **Action:** Rewrite
+
+This ensures all routes are handled by the React Router and non-existent routes return `index.html` instead of 404 errors.
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)

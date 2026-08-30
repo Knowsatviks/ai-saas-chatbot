@@ -1,12 +1,19 @@
 import axios from "axios";
 
+// Create axios instance with baseURL from environment variable
+// Allows switching between local (http://localhost:8000) and production URLs
+const api = axios.create({
+  baseURL: `${import.meta.env.VITE_API_URL}`,
+  withCredentials: true,
+});
+
 export const signupUser = async (
   name: string,
   email: string,
   password: string
 ) => {
   try {
-    const res = await axios.post("/user/signup", { name, email, password });
+    const res = await api.post("/user/signup", { name, email, password });
     if (res.status !== 201) {
       throw new Error("Unable to Signup");
     }
@@ -20,7 +27,7 @@ export const signupUser = async (
 };
 
 export const loginUser = async (email: string, password:string)=>{
-    const res = await axios.post("/user/login", {email, password});
+    const res = await api.post("/user/login", {email, password});
 
     if(res.status !== 201){
         throw new Error("Unable to login");
@@ -31,7 +38,7 @@ export const loginUser = async (email: string, password:string)=>{
 }
 
 export const logoutUser = async () => {
-  const res = await axios.get("/user/logout");
+  const res = await api.get("/user/logout");
   if (res.status !== 200) {
     throw new Error("Unable to delete chats");
   }
@@ -40,7 +47,7 @@ export const logoutUser = async () => {
 };
 
 export const checkAuthStatus = async ()=>{
-    const res = await axios.get("/user/auth-status");
+    const res = await api.get("/user/auth-status");
 
     if(res.status !== 200){
         throw new Error("Unable to authenticate userin");
@@ -52,7 +59,7 @@ export const checkAuthStatus = async ()=>{
 
 export const requestPasswordReset = async (email: string) => {
   try {
-    const res = await axios.post("/user/forgot-password", { email });
+    const res = await api.post("/user/forgot-password", { email });
     return res.data;
   } catch (error: any) {
     throw new Error(error?.response?.data?.message || "Unable to send reset OTP");
@@ -61,7 +68,7 @@ export const requestPasswordReset = async (email: string) => {
 
 export const verifyPasswordResetOtp = async (email: string, otp: string) => {
   try {
-    const res = await axios.post("/user/verify-reset-otp", { email, otp });
+    const res = await api.post("/user/verify-reset-otp", { email, otp });
     return res.data;
   } catch (error: any) {
     throw new Error(error?.response?.data?.message || "The OTP is invalid");
@@ -70,7 +77,7 @@ export const verifyPasswordResetOtp = async (email: string, otp: string) => {
 
 export const resetPassword = async (resetToken: string, password: string) => {
   try {
-    const res = await axios.post("/user/reset-password", { resetToken, password });
+    const res = await api.post("/user/reset-password", { resetToken, password });
     return res.data;
   } catch (error: any) {
     throw new Error(error?.response?.data?.message || "Unable to update password");
@@ -78,7 +85,7 @@ export const resetPassword = async (resetToken: string, password: string) => {
 };
 
 export const createConversation = async (payload: { title?: string; personaId?: string | null }) => {
-  const res = await axios.post("/chat/conversations", payload);
+  const res = await api.post("/chat/conversations", payload);
 
   if (res.status !== 201) {
     throw new Error("Unable to create conversation");
@@ -88,7 +95,7 @@ export const createConversation = async (payload: { title?: string; personaId?: 
 };
 
 export const getConversations = async () => {
-  const res = await axios.get("/chat/conversations");
+  const res = await api.get("/chat/conversations");
 
   if (res.status !== 200) {
     throw new Error("Unable to get conversations");
@@ -98,7 +105,7 @@ export const getConversations = async () => {
 };
 
 export const renameConversation = async (conversationId: string, title: string) => {
-  const res = await axios.put("/chat/conversations/rename", { conversationId, title });
+  const res = await api.put("/chat/conversations/rename", { conversationId, title });
 
   if (res.status !== 200) {
     throw new Error("Unable to rename conversation");
@@ -108,7 +115,7 @@ export const renameConversation = async (conversationId: string, title: string) 
 };
 
 export const deleteConversation = async (conversationId: string) => {
-  const res = await axios.delete("/chat/conversations", { data: { conversationId } });
+  const res = await api.delete("/chat/conversations", { data: { conversationId } });
 
   if (res.status !== 200) {
     throw new Error("Unable to delete conversation");
@@ -118,7 +125,7 @@ export const deleteConversation = async (conversationId: string) => {
 };
 
 export const sendChatRequest = async (conversationId: string, message: string, personaId?: string | null, signal?: AbortSignal) => {
-    const res = await axios.post("/chat/new", { conversationId, message, personaId }, { signal });
+    const res = await api.post("/chat/new", { conversationId, message, personaId }, { signal });
 
     if (res.status !== 200) {
         throw new Error("Unable to send chat");
@@ -129,7 +136,7 @@ export const sendChatRequest = async (conversationId: string, message: string, p
 }
 
 export const getUserPersonas = async () => {
-  const res = await axios.get("/chat/personas");
+  const res = await api.get("/chat/personas");
 
   if (res.status !== 200) {
     throw new Error("Unable to get personas");
@@ -144,7 +151,7 @@ export const createPersona = async (payload: {
   personality?: string;
   tone?: string;
 }) => {
-  const res = await axios.post("/chat/personas", payload);
+  const res = await api.post("/chat/personas", payload);
 
   if (res.status !== 201) {
     throw new Error("Unable to create persona");
@@ -154,7 +161,7 @@ export const createPersona = async (payload: {
 };
 
 export const deletePersona = async (personaId: string) => {
-  const res = await axios.delete(`/chat/personas/${personaId}`);
+  const res = await api.delete(`/chat/personas/${personaId}`);
   if (res.status !== 200) {
     throw new Error("Unable to delete persona");
   }
@@ -162,7 +169,7 @@ export const deletePersona = async (personaId: string) => {
 };
 
 export const getUserChats = async () => {
-    const res = await axios.get("/chat/conversations");
+    const res = await api.get("/chat/conversations");
 
     if (res.status !== 200) {
         throw new Error("Unable to get chats");
